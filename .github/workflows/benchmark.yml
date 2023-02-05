@@ -1,0 +1,57 @@
+name: benchmark
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+    workflow_dispatch:
+
+jobs:
+    benchmark:
+        name: Benchmark for ${{ matrix.os }}
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+                include:
+                    - os: ubuntu-latest
+                    - os: windows-latest
+                    - os: macos-latest
+
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Prepare
+              shell: bash
+              run: |
+                  mkdir -p dist
+	              rm -rf dist/*
+
+            - name: Build for Linux
+              if: matrix.os == 'ubuntu-latest'
+              run: |
+                  curl -L https://github.com/asg017/sqlite-regex/releases/download/v0.1.0/linux-x86_64-regex0.so --output dist/regex0.so
+                  gcc -fPIC -shared src/sqlite3-stats.c -o dist/stats.so -lm
+                  gcc -O3 -fPIC -shared src/sqlite3-re.c src/re.c -o dist/re.so
+
+            - name: Build for Windows
+              if: matrix.os == 'windows-latest'
+              shell: bash
+              run: |
+                  curl -L https://github.com/asg017/sqlite-regex/releases/download/v0.1.0/windows-x86_64-regex0.dll --output dist/regex0.dll
+                  gcc -shared -I. src/sqlite3-stats.c -o dist/stats.dll -lm
+                  gcc -O3 -shared -I. src/sqlite3-re.c src/re.c -o dist/re.dll
+
+            - name: Build for macOS
+              if: matrix.os == 'macos-latest'
+              run: |
+                  curl -L https://github.com/asg017/sqlite-regex/releases/download/v0.1.0/macos-x86_64-regex0.dylib --output dist/regex0.dylib
+                  gcc -fPIC -dynamiclib -I src src/sqlite3-stats.c -o dist/stats.dylib -lm
+                  gcc -O3 -fPIC -dynamiclib -I src src/sqlite3-re.c src/re.c -o dist/re.dylib
+
+            - name: Benchmark
+              shell: bash
+              run: |
+                  sqlite3 dist/bench.db < prepare-db.sql
+                  sqlite3 dist/bench.db < sqlite-regex.sql
+                  sqlite3 dist/bench.db < sqlean-re.sql
