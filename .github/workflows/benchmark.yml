@@ -64,9 +64,9 @@ jobs:
               if: matrix.os == 'windows-latest'
               shell: bash
               run: |
-                  sqlite3.exe dist/bench.db < prepare-db.sql
-                  sqlite3.exe dist/bench.db < sqlite-regex.sql
-                  sqlite3.exe dist/bench.db < sqlean-re.sql
+                  ./sqlite3.exe dist/bench.db < prepare-db.sql
+                  ./sqlite3.exe dist/bench.db < sqlite-regex.sql
+                  ./sqlite3.exe dist/bench.db < sqlean-re.sql
 
             - name: Benchmark (macOS)
               if: matrix.os == 'macos-latest'
