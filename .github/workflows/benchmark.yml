@@ -31,7 +31,8 @@ jobs:
               if: matrix.os == 'ubuntu-latest'
               run: |
                   curl -L https://github.com/asg017/sqlite-regex/releases/download/v0.1.0/linux-x86_64-regex0.so --output dist/regex0.so
-                  gcc -fPIC -shared src/sqlite3-stats.c -o dist/stats.so -lm
+                  curl -L https://github.com/nalgeon/sqlean/releases/download/0.18.4/sqlean-linux-x86.zip --output dist/sqlean.zip
+                  unzip dist/sqlean.zip -d dist/
                   gcc -O3 -fPIC -shared src/sqlite3-re.c src/re.c -o dist/re.so
 
             - name: Build (Windows)
@@ -40,7 +41,8 @@ jobs:
               run: |
                   curl -L https://github.com/asg017/sqlite-regex/releases/download/v0.1.0/windows-x86_64-regex0.dll --output dist/regex0.dll
                   curl -L https://github.com/nalgeon/sqlite/releases/download/3.40.0/sqlite3.exe --output sqlite3.exe
-                  gcc -shared -I. src/sqlite3-stats.c -o dist/stats.dll -lm
+                  curl -L https://github.com/nalgeon/sqlean/releases/download/0.18.4/sqlean-win-x64.zip --output dist/sqlean.zip
+                  unzip dist/sqlean.zip -d dist/
                   gcc -O3 -shared -I. src/sqlite3-re.c src/re.c -o dist/re.dll
 
             - name: Build (macOS)
@@ -49,7 +51,8 @@ jobs:
                   curl -L https://github.com/asg017/sqlite-regex/releases/download/v0.1.0/macos-x86_64-regex0.dylib --output dist/regex0.dylib
                   curl -L https://github.com/nalgeon/sqlite/releases/download/3.40.0/sqlite3-macos --output sqlite3
                   chmod +x ./sqlite3
-                  gcc -fPIC -dynamiclib -I src src/sqlite3-stats.c -o dist/stats.dylib -lm
+                  curl -L https://github.com/nalgeon/sqlean/releases/download/0.18.4/sqlean-macos-x86.zip --output dist/sqlean.zip
+                  unzip dist/sqlean.zip -d dist/
                   gcc -O3 -fPIC -dynamiclib -I src src/sqlite3-re.c src/re.c -o dist/re.dylib
 
             - name: Benchmark (Linux)
@@ -59,6 +62,7 @@ jobs:
                   sqlite3 dist/bench.db < prepare-db.sql
                   sqlite3 dist/bench.db < sqlite-regex.sql
                   sqlite3 dist/bench.db < sqlean-re.sql
+                  sqlite3 dist/bench.db < sqlean-regexp.sql
 
             - name: Benchmark (Windows)
               if: matrix.os == 'windows-latest'
@@ -67,6 +71,7 @@ jobs:
                   ./sqlite3.exe dist/bench.db < prepare-db.sql
                   ./sqlite3.exe dist/bench.db < sqlite-regex.sql
                   ./sqlite3.exe dist/bench.db < sqlean-re.sql
+                  ./sqlite3.exe dist/bench.db < sqlean-regexp.sql
 
             - name: Benchmark (macOS)
               if: matrix.os == 'macos-latest'
@@ -75,3 +80,4 @@ jobs:
                   ./sqlite3 dist/bench.db < prepare-db.sql
                   ./sqlite3 dist/bench.db < sqlite-regex.sql
                   ./sqlite3 dist/bench.db < sqlean-re.sql
+                  ./sqlite3 dist/bench.db < sqlean-regexp.sql
