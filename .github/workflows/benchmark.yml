@@ -25,7 +25,7 @@ jobs:
               shell: bash
               run: |
                   mkdir -p dist
-	              rm -rf dist/*
+                  rm -rf dist/*
 
             - name: Build for Linux
               if: matrix.os == 'ubuntu-latest'
